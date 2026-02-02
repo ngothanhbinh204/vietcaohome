@@ -1,0 +1,273 @@
+/**
+ * Currency Switcher Styles
+ * 
+ * CSS cho currency switcher và price display.
+ * 
+ * @package ViethomeCao
+ * @since 1.0.0
+ */
+
+/* ==========================================================================
+   Currency Switcher
+   ========================================================================== */
+
+.currency-switcher {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.currency-btn {
+    padding: 8px 20px;
+    border: 2px solid #ddd;
+    background: #fff;
+    color: #333;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.currency-btn:hover {
+    border-color: #0073aa;
+    color: #0073aa;
+    background: #f0f6fc;
+}
+
+.currency-btn.active {
+    border-color: #0073aa;
+    background: #0073aa;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 115, 170, 0.3);
+}
+
+.currency-btn:focus {
+    outline: 2px solid #0073aa;
+    outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Property Price Block
+   ========================================================================== */
+
+.property-price-block {
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Price Display Area */
+.price-display-area {
+    margin-bottom: 15px;
+}
+
+.price-group {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Price Rows */
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 12px 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.price-row:last-child {
+    border-bottom: none;
+}
+
+.price-label {
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+}
+
+.price-value {
+    font-size: 20px;
+    color: #0073aa;
+    font-weight: 700;
+}
+
+.price-row.price-total .price-value {
+    font-size: 24px;
+    color: #d63638;
+}
+
+.price-row.price-unit .price-value {
+    font-size: 16px;
+    color: #0073aa;
+}
+
+/* Area Info */
+.property-area-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-top: 2px solid #ddd;
+    margin-top: 10px;
+}
+
+.area-label {
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+}
+
+.area-value {
+    font-size: 16px;
+    color: #333;
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   Shortcode Styles
+   ========================================================================== */
+
+.property-price-shortcode {
+    display: inline-block;
+    padding: 10px 15px;
+    background: #f0f6fc;
+    border-left: 3px solid #0073aa;
+    border-radius: 4px;
+}
+
+.property-price-shortcode .price-row {
+    display: block;
+    padding: 5px 0;
+    border: none;
+}
+
+.property-price-shortcode .price-label {
+    display: inline;
+    margin-right: 5px;
+}
+
+.property-price-shortcode .price-value {
+    display: inline;
+    font-size: 16px;
+}
+
+/* Empty State */
+.property-price-empty,
+.property-price-block-empty,
+.property-price-contact {
+    padding: 15px 20px;
+    text-align: center;
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 4px;
+    color: #856404;
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   Debug Info (chỉ admin)
+   ========================================================================== */
+
+.price-debug-info {
+    margin-top: 15px;
+    padding: 10px;
+    background: #f0f0f1;
+    border-radius: 4px;
+    font-size: 11px;
+    color: #666;
+    font-family: monospace;
+}
+
+.price-debug-info strong {
+    color: #333;
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .property-price-block {
+        padding: 15px;
+    }
+    
+    .currency-switcher {
+        gap: 8px;
+    }
+    
+    .currency-btn {
+        padding: 6px 15px;
+        font-size: 13px;
+    }
+    
+    .price-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .price-value {
+        font-size: 18px !important;
+    }
+    
+    .price-row.price-total .price-value {
+        font-size: 20px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .property-price-block {
+        padding: 12px;
+    }
+    
+    .currency-btn {
+        padding: 5px 12px;
+        font-size: 12px;
+    }
+    
+    .price-value {
+        font-size: 16px !important;
+    }
+    
+    .price-row.price-total .price-value {
+        font-size: 18px !important;
+    }
+}
+
+/* ==========================================================================
+   Print Styles
+   ========================================================================== */
+
+@media print {
+    .currency-switcher {
+        display: none;
+    }
+    
+    .property-price-block {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+    
+    .price-debug-info {
+        display: none !important;
+    }
+}
