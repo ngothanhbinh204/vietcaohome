@@ -27,6 +27,56 @@ class VHC_Price_Shortcode {
     public function __construct() {
         add_shortcode( 'property_price', array( $this, 'render_price' ) );
         add_shortcode( 'property_price_block', array( $this, 'render_price_block' ) );
+        add_shortcode( 'vhc_currency_switcher', array( $this, 'render_currency_switcher_widget' ) );
+    }
+    
+    /**
+     * Render shortcode [vhc_currency_switcher]
+     * Hiển thị dropdown slect currency toàn cục
+     * 
+     * @param array $atts Shortcode attributes
+     * @return string
+     */
+    public function render_currency_switcher_widget( $atts ) {
+        $atts = shortcode_atts( array(
+            'class' => '',
+        ), $atts, 'vhc_currency_switcher' );
+
+        $currencies = array(
+            'VND' => 'VND',
+            'USD' => 'USD',
+            'TWD' => 'TWD',
+        );
+
+        $output  = '<div class="vhc-currency-switcher-widget ' . esc_attr( $atts['class'] ) . '">';
+        
+        // 1. Data Layer: Hidden Native Select (Single Source of Truth)
+        // Style display:none creates accessibility issues sometimes, so we use visual hidden style
+        $output .= '<select class="vhc-currency-select" style="position: absolute; opacity: 0; pointer-events: none; width: 1px; height: 1px; overflow: hidden;" aria-hidden="true" tabindex="-1">';
+        foreach ( $currencies as $code => $label ) {
+            $output .= '<option value="' . esc_attr( $code ) . '" data-label="' . esc_html( $label ) . '">' . esc_html( $label ) . '</option>';
+        }
+        $output .= '</select>';
+
+        // 2. Presentation Layer: Custom UI
+        $output .= '<div class="vhc-custom-dropdown">';
+            // Trigger Button
+            $output .= '<button type="button" class="vhc-dropdown-trigger" aria-haspopup="listbox" aria-expanded="false">';
+                $output .= '<span class="vhc-current-label"><span class="vhc-loader"></span></span>'; // Default loading state
+                $output .= '<span class="vhc-arrow"></span>';
+            $output .= '</button>';
+
+            // Dropdown List
+            $output .= '<ul class="vhc-dropdown-list" role="listbox">';
+            foreach ( $currencies as $code => $label ) {
+                $output .= '<li role="option" data-value="' . esc_attr( $code ) . '" class="vhc-dropdown-item">' . esc_html( $label ) . '</li>';
+            }
+            $output .= '</ul>';
+        $output .= '</div>'; // End custom UI
+
+        $output .= '</div>';
+
+        return $output;
     }
     
     /**

@@ -28,21 +28,16 @@ class VHC_Price_Formatter {
      * @param bool   $with_symbol Có hiển thị ký hiệu tiền tệ không
      * @return string
      */
-    public static function format_price( $amount, $currency = 'VND', $with_symbol = true ) {
+    public static function format_price( $amount, $is_unit_price = false, $currency = 'VND', $with_symbol = true ) {
         if ( ! is_numeric( $amount ) ) {
             return '';
         }
-        
         $amount   = floatval( $amount );
+        
         $currency = strtoupper( $currency );
-        
-        // Lấy config format theo currency
         $config = self::get_currency_config( $currency );
-        
-        // Round số theo decimals của từng loại tiền
-        $amount = round( $amount, $config['decimals'] );
-        
-        // Format số với dấu phân cách
+        $decimals = $is_unit_price ? 2 : $config['decimals'];
+        $amount = round( $amount, $decimals );
         $formatted = number_format(
             $amount,
             $config['decimals'],
@@ -63,39 +58,104 @@ class VHC_Price_Formatter {
         
         return $formatted;
     }
-    
+
+    /**
+     * Render Block Giá Đa Tiền Tệ (Standard HTML Structure)
+     * Dùng chung cho: Property Card, Single Property Page, Shortcode...
+     * 
+     * @param int $post_id ID của Bất động sản
+     * @param array $args Các tham số tùy chọn (custom class, label override...)
+     */
+    public static function render_multi_currency_block( $post_id, $args = array() ) {
+        if ( ! class_exists( 'VHC_Price_Calculator' ) ) {
+            return '';
+        }
+        $price_data = VHC_Price_Calculator::calculate( $post_id );
+        if ( ! $price_data ) {
+            return '';
+        }
+
+        $label        = esc_html( get_post_meta( $post_id, 'property_label', true ) );
+        $label_before = esc_html( get_post_meta( $post_id, 'property_label_before', true ) );
+
+        ob_start();
+        ?>
+        <div class="property-price-block <?php echo isset($args['class']) ? esc_attr($args['class']) : ''; ?>">
+            <div class="price-group" data-currency-group="VND">
+                <div class="price-inner-group">
+                    <div class="price-total">
+                        <?php echo $label_before ? '<span class="price_label price_label_before">' . $label_before . '</span> ' : ''; ?>
+                        <?php echo self::format_price( $price_data['total_price_vnd'], false, 'VND', true ); ?>
+                        <?php echo $label ? '<span class="price_label">' . $label . '</span>' : ''; ?>
+                    </div>
+                    <?php if ( $price_data['unit_price_vnd'] > 0 ) : ?>
+                        <div class="price-unit">
+                            <?php echo self::format_price( $price_data['unit_price_vnd'], true, 'VND', true ); ?>/m²
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <div class="price-group" data-currency-group="USD" style="display: none;">
+                <div class="price-inner-group">
+                    <div class="price-total">
+                        <?php echo $label_before ? '<span class="price_label price_label_before">' . $label_before . '</span> ' : ''; ?>
+                        <?php echo self::format_price( $price_data['total_price_usd'], false, 'USD', true ); ?>
+                        <?php echo $label ? '<span class="price_label">' . $label . '</span>' : ''; ?>
+                    </div>
+                    <?php if ( $price_data['unit_price_usd'] > 0 ) : ?>
+                        <div class="price-unit">
+                            <?php echo self::format_price( $price_data['unit_price_usd'], true, 'USD', true ); ?>/m²
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <div class="price-group" data-currency-group="TWD" style="display: none;">
+                <div class="price-inner-group">
+                    <div class="price-total">
+                        <?php echo $label_before ? '<span class="price_label price_label_before">' . $label_before . '</span> ' : ''; ?>
+                        <?php echo self::format_price( $price_data['total_price_twd'], false, 'TWD', true ); ?>
+                        <?php echo $label ? '<span class="price_label">' . $label . '</span>' : ''; ?>
+                    </div>
+                    <?php if ( $price_data['unit_price_twd'] > 0 ) : ?>
+                        <div class="price-unit">
+                            <?php echo self::format_price( $price_data['unit_price_twd'], true, 'TWD', true ); ?>/m²
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+        </div>
+        <?php
+        return ob_get_clean();
+    }
     /**
      * Lấy config format cho từng currency
-     * 
-     * @param string $currency Currency code
-     * @return array
      */
     private static function get_currency_config( $currency ) {
         $configs = array(
             'VND' => array(
-                'symbol'             => 'đ',
-                'symbol_position'    => 'after',  // before hoặc after
-                'decimals'           => 0,         // VND không dùng số thập phân
+                'symbol'             => 'VND',
+                'symbol_position'    => 'after',  
+                'decimals'           => 0,         
                 'decimal_separator'  => ',',
                 'thousand_separator' => '.',
             ),
             'USD' => array(
-                'symbol'             => '$',
-                'symbol_position'    => 'before',
+                'symbol'             => 'USD',
+                'symbol_position'    => 'after',
                 'decimals'           => 2,
                 'decimal_separator'  => '.',
                 'thousand_separator' => ',',
             ),
             'TWD' => array(
-                'symbol'             => 'NT$',
-                'symbol_position'    => 'before',
-                'decimals'           => 0,         // TWD thường không dùng số thập phân
+                'symbol'             => 'TWD',
+                'symbol_position'    => 'after',
+                'decimals'           => 0,       
                 'decimal_separator'  => '.',
                 'thousand_separator' => ',',
             ),
         );
         
-        // Cho phép theme override config
         $configs = apply_filters( 'vhc_currency_configs', $configs );
         
         return isset( $configs[ $currency ] ) ? $configs[ $currency ] : $configs['VND'];

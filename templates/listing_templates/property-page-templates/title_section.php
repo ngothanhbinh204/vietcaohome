@@ -56,6 +56,10 @@ $property_second_price = ($second_price_details['price'] != 0)
         $second_price_details['label_before'],
         $second_price_details['label']
     );
+
+// VHC Multi-Currency Logic
+$class_exists = class_exists( 'VHC_Price_Calculator' );
+$price_data = $class_exists ? VHC_Price_Calculator::calculate( $selectedPropertyID ) : false;
 ?>
 
 <div class="single_property_labels">
@@ -66,6 +70,14 @@ $property_second_price = ($second_price_details['price'] != 0)
 <h1 class="entry-title entry-prop"><?php echo get_the_title($selectedPropertyID); ?></h1>
 
 <div class="price_area">
-    <div class="second_price_area"><?php echo wp_kses_post($property_second_price); ?></div>    
-    <?php echo wp_kses_post($price); ?>
+    <?php 
+    if ( $price_data ) {
+        echo VHC_Price_Formatter::render_multi_currency_block( $selectedPropertyID );
+    } else {
+    ?>
+        <div class="second_price_area"><?php echo wp_kses_post($property_second_price); ?></div>    
+        <?php echo wp_kses_post($price); ?>
+    <?php 
+    } 
+    ?>
 </div>

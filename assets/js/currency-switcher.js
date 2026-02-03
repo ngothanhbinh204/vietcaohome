@@ -25,7 +25,8 @@
             block: '.property-price-block',
             switcher: '.currency-switcher',
             button: '.currency-btn',
-            priceGroup: '.price-group'
+            priceGroup: '.price-group',
+            globalSelect: '.vhc-currency-select'
         }
     };
     
@@ -54,18 +55,99 @@
          * Setup sau khi DOM ready
          */
         setup() {
-            // Tìm tất cả price blocks
+            // 1. Setup global selectors (dropdowns)
+            this.setupGlobalSelects();
+
+            // 2. Setup property blocks
             const blocks = document.querySelectorAll(CONFIG.selector.block);
-            
-            if (blocks.length === 0) {
-                return;
+            if (blocks.length > 0) {
+                blocks.forEach(block => this.setupBlock(block));
             }
             
-            // Setup từng block
-            blocks.forEach(block => this.setupBlock(block));
-            
-            // Áp dụng currency đã lưu
+            // 3. Apply saved currency
             this.switchCurrency(this.currentCurrency, false);
+        }
+
+        /**
+         * Setup Global Select Dropdowns (Custom UI + Hidden Select)
+         */
+        setupGlobalSelects() {
+            // Find all custom dropdowns directly
+            const customDropdowns = document.querySelectorAll('.vhc-custom-dropdown');
+            
+            customDropdowns.forEach(customUI => {
+                // Find parent wrapper
+                const widget = customUI.closest('.vhc-currency-switcher-widget');
+                if (!widget) return;
+
+                // Find associated elements
+                const select = widget.querySelector('select.vhc-currency-select');
+                const trigger = customUI.querySelector('.vhc-dropdown-trigger');
+                const items = customUI.querySelectorAll('.vhc-dropdown-item');
+
+                if (!select || !trigger) {
+                    console.warn('VHC: Missing select or trigger in widget', widget);
+                    return;
+                }
+
+                // 1. Sync initial state
+                select.value = this.currentCurrency;
+                this.updateCustomUI(widget, this.currentCurrency);
+
+                // 2. Click Trigger -> Toggle Dropdown
+                trigger.onclick = (e) => { // Use onclick to avoid duplicate listeners issues
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Close other dropdowns
+                    document.querySelectorAll('.vhc-custom-dropdown').forEach(el => {
+                        if (el !== customUI) el.classList.remove('active');
+                    });
+                    
+                    customUI.classList.toggle('active');
+                };
+
+                // 3. Click Item -> Select Value
+                items.forEach(item => {
+                    item.onclick = (e) => { // Use onclick
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        const value = item.getAttribute('data-value');
+                        
+                        // Update Hidden Select
+                        select.value = value;
+                        // Dispatch Change (Standard Flow)
+                        select.dispatchEvent(new Event('change'));
+                        
+                        // Close
+                        customUI.classList.remove('active');
+                    };
+                });
+
+                // 4. Native Select Change -> Update UI
+                // Only bind once
+                if (!select.dataset.bound) {
+                    select.addEventListener('change', (e) => {
+                        const newCurrency = e.target.value;
+                        this.switchCurrency(newCurrency, true);
+                        this.updateCustomUI(widget, newCurrency);
+                    });
+                    select.dataset.bound = true;
+                }
+            });
+
+            // Close when clicking outside
+            if (!document.body.dataset.vhcBound) {
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.vhc-custom-dropdown')) {
+                        document.querySelectorAll('.vhc-custom-dropdown.active').forEach(el => {
+                            el.classList.remove('active');
+                        });
+                    }
+                });
+                document.body.dataset.vhcBound = true;
+            }
         }
         
         /**
@@ -117,13 +199,61 @@
             currency = currency.toUpperCase();
             this.currentCurrency = currency;
             
-            // Lưu vào localStorage
+            // Lưu vào localStorage & Cookie
             if (saveToStorage) {
                 this.saveCurrency(currency);
+                this.setCookie('vhc_currency', currency, 30); // 30 days
             }
             
-            // Update UI cho tất cả blocks
+            // Update UI
             this.updateAllBlocks(currency);
+            this.updateGlobalSelects(currency);
+        }
+
+        /**
+         * Update tất cả global selects để đồng bộ
+         */
+        updateGlobalSelects(currency) {
+            const widgets = document.querySelectorAll('.vhc-currency-switcher-widget');
+            widgets.forEach(widget => {
+                const select = widget.querySelector(CONFIG.selector.globalSelect);
+                if (select) {
+                    select.value = currency; // Update value
+                    this.updateCustomUI(widget, currency); // Update Visuals
+                }
+            });
+        }
+
+        /**
+         * Update UI Text & Active State based on currency
+         */
+        updateCustomUI(widget, currency) {
+            const label = widget.querySelector('.vhc-current-label');
+            const items = widget.querySelectorAll('.vhc-dropdown-item');
+            
+            // Update Label Text (find label from items or define map)
+            const activeItem = Array.from(items).find(item => item.getAttribute('data-value') === currency);
+            if (activeItem && label) {
+                label.textContent = activeItem.textContent; 
+                
+                // Update selected class
+                items.forEach(i => i.classList.remove('selected'));
+                activeItem.classList.add('selected');
+            }
+        }
+
+        
+        /**
+         * Set Cookie Helper
+         */
+        setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "") + expires + "; path=/";
         }
         
         /**
