@@ -10,9 +10,11 @@ require_once VHC_THEME_DIR . '/inc/price/price-calculator.php';
 require_once VHC_THEME_DIR . '/inc/price/price-formatter.php';
 require_once VHC_THEME_DIR . '/inc/price/price-shortcode.php';
 require_once VHC_THEME_DIR . '/inc/price/price-hooks.php';
-if ( is_admin() ) {
-    require_once VHC_THEME_DIR . '/inc/admin/exchange-rate-options.php';
-}
+require_once VHC_THEME_DIR . '/inc/admin/exchange-rate-options.php';
+
+// if ( is_admin() ) {
+//     require_once VHC_THEME_DIR . '/inc/admin/exchange-rate-options.php';
+// }
 
 if ( !function_exists( 'wpestate_chld_thm_cfg_parent_css' ) ):
     function wpestate_chld_thm_cfg_parent_css() {
@@ -92,3 +94,48 @@ function vhc_enqueue_assets() {
     ) );
 }
 add_action( 'wp_enqueue_scripts', 'vhc_enqueue_assets' );
+
+
+if(!function_exists('wpestate_all_prop_details_prop_unit')):
+function wpestate_all_prop_details_prop_unit(){
+    $single_details = array(
+
+        'Image'         =>  'image',
+        'Title'         =>  'title',
+        'Description'   =>  'description',
+        'Categories'    =>  'property_category',
+        'Action'        =>  'property_action_category',
+        'City'          =>  'property_city',
+        'Neighborhood'  =>  'property_area',
+        'County / State'=>  'property_county_state',
+        'Address'       =>  'property_address',
+        'Zip'           =>  'property_zip',
+        'Country'       =>  'property_country',
+        'Status'        =>  'property_status',
+        'Price'         =>  'property_price',
+
+        'Size'              =>  'property_size',
+        'Lot Size'          =>  'property_lot_size',
+        'Rooms'             =>  'property_rooms',
+        'Bedrooms'          =>  'property_bedrooms',
+        'Bathrooms'         =>  'property_bathrooms',
+        'Agent'             =>  'property_agent',
+        'Agent Picture'     =>  'property_agent_picture'
+
+    );
+
+    $custom_fields = wpresidence_get_option( 'wp_estate_custom_fields', '');
+    if( !empty($custom_fields)){
+        $i=0;
+        while($i< count($custom_fields) ){
+            $name =   $custom_fields[$i][0];
+            $slug         =     wpestate_limit45(sanitize_title( $name ));
+            $slug         =     sanitize_key($slug);
+            $single_details[str_replace('-',' ',$name)]=     $slug;
+            $i++;
+       }
+    }
+
+    return $single_details;
+}
+endif;

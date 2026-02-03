@@ -28,7 +28,6 @@ class VHC_Price_Calculator {
      * @return array|false Trả về array dữ liệu hoặc false nếu thiếu data
      */
     public static function calculate( $post_id = null ) {
-        // Lấy post ID
         if ( is_null( $post_id ) ) {
             $post_id = get_the_ID();
         } elseif ( is_object( $post_id ) && isset( $post_id->ID ) ) {
@@ -39,16 +38,15 @@ class VHC_Price_Calculator {
             return false;
         }
         
-        // Lấy giá VND và diện tích từ post meta
         $total_price_vnd = self::get_total_price_vnd( $post_id );
         $area_m2         = self::get_area( $post_id );
         
-        // Kiểm tra dữ liệu
-        if ( ! $total_price_vnd || ! $area_m2 || $area_m2 <= 0 ) {
+        if ( ! $total_price_vnd ) {
             return false;
         }
-        
-        // Lấy tỷ giá
+        if ( ! $area_m2 || $area_m2 <= 0 ) {
+            $area_m2 = 0;
+        }
         $rate_usd = VHC_Exchange_Rate_Options::get_rate( 'usd' );
         $rate_twd = VHC_Exchange_Rate_Options::get_rate( 'twd' );
         
@@ -56,34 +54,22 @@ class VHC_Price_Calculator {
             return false;
         }
         
-        // Tính đơn giá VND (KHÔNG làm tròn sớm)
-        $unit_price_vnd = $total_price_vnd / $area_m2;
+        $unit_price_vnd = ( $area_m2 > 0 ) ? ( $total_price_vnd / $area_m2 ) : 0;
         
-        // Tính giá USD (tổng và đơn giá tính ĐỘC LẬP)
         $total_price_usd = $total_price_vnd / $rate_usd;
-        $unit_price_usd  = $unit_price_vnd / $rate_usd;
+        $unit_price_usd  = ( $area_m2 > 0 ) ? ( $unit_price_vnd / $rate_usd ) : 0;
         
-        // Tính giá TWD (tổng và đơn giá tính ĐỘC LẬP)
         $total_price_twd = $total_price_vnd / $rate_twd;
-        $unit_price_twd  = $unit_price_vnd / $rate_twd;
+        $unit_price_twd  = ( $area_m2 > 0 ) ? ( $unit_price_vnd / $rate_twd ) : 0;
         
-        // Trả về array đầy đủ (chưa format, chưa round)
         return array(
             'area_m2'         => floatval( $area_m2 ),
-            
-            // VND
             'total_price_vnd' => floatval( $total_price_vnd ),
             'unit_price_vnd'  => floatval( $unit_price_vnd ),
-            
-            // USD
             'total_price_usd' => floatval( $total_price_usd ),
             'unit_price_usd'  => floatval( $unit_price_usd ),
-            
-            // TWD
             'total_price_twd' => floatval( $total_price_twd ),
             'unit_price_twd'  => floatval( $unit_price_twd ),
-            
-            // Tỷ giá (để debug hoặc hiển thị)
             'rate_usd'        => floatval( $rate_usd ),
             'rate_twd'        => floatval( $rate_twd ),
         );
@@ -96,12 +82,10 @@ class VHC_Price_Calculator {
      * @return float|false
      */
     private static function get_total_price_vnd( $post_id ) {
-        // Danh sách các meta key có thể dùng trong theme
-        // Thứ tự ưu tiên: meta key tùy chỉnh → ACF → meta key phổ biến
         $meta_keys = apply_filters( 'vhc_price_meta_keys', array(
-            'property_price',           // Meta key phổ biến
-            '_property_price',          // Meta key có underscore
-            'price',                    // Meta key đơn giản
+            'property_price',
+            '_property_price',
+            'price',
             '_price',
             'total_price',
             '_total_price',
@@ -127,9 +111,9 @@ class VHC_Price_Calculator {
      * @return float|false
      */
     private static function get_area( $post_id ) {
-        // Danh sách các meta key có thể dùng
         $meta_keys = apply_filters( 'vhc_area_meta_keys', array(
             'property_area',
+            'property_lot_size',
             '_property_area',
             'area',
             '_area',
