@@ -32,22 +32,23 @@ if (empty($agent_details['realtor_image'])) {
 
 $term_link = $agent_details['link'];
 ?>
-
+<!-- Thêm data-link="<?php echo esc_attr($term_link); ?> vào div để click vào detail -->
 <div class="<?php echo esc_attr($agent_unit_col_class['col_class']); ?> elementor_residence_grid agent_card_2  ">
-    <div class="listing_wrapper elementor_places_wrapper" <?php echo esc_attr($item_height_style); ?>>
-        <div class="property_listing  places_listing" data-link="<?php echo esc_attr($term_link); ?>" style="<?php echo trim($inline_style); ?>">
-            <div class="places_cover agent_grid_elementor" data-link="<?php echo esc_attr($term_link); ?>"></div>
-        </div>
+	<div class="listing_wrapper elementor_places_wrapper" <?php echo esc_attr($item_height_style); ?>>
+		<div class="property_listing  places_listing" style="<?php echo trim($inline_style); ?>">
+			<div class="places_cover agent_grid_elementor"></div>
 
-        <h4 class="realtor_name">
-            <a href="<?php echo esc_url($term_link); ?>">
-                <?php echo esc_html($agent_details['realtor_name']); ?>
-            </a>
-        </h4>
+		</div>
 
-        <div class="property_location realtor_position">
-            <?php echo esc_html($agent_details['realtor_position']); ?>
-        </div>
+		<h4 class="realtor_name">
+			<!-- <a href="<?php echo esc_url($term_link); ?>"> -->
+			<?php echo esc_html($agent_details['realtor_name']); ?>
+			<!-- </a> -->
+		</h4>
 
-    </div>
+		<div class="property_location realtor_position">
+			<?php echo esc_html($agent_details['realtor_position']); ?>
+		</div>
+
+	</div>
 </div>

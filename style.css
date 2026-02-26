@@ -10,4 +10,24 @@
  License URI:  http://www.gnu.org/licenses/gpl-2.0.html
 */
 
+:root {
+	--red-color: #D32F2F;
+	--graySecondary-color: #54595F;
+}
+.property_listing .listing-unit-img-wrapper, .property_listing .carousel {
+	max-height: none;
+}
 
+.elementor-kit-26 button, .elementor-kit-26 input[type="button"], .elementor-kit-26 input[type="submit"], .elementor-kit-26 .elementor-button {
+	font-weight: 400 !important;
+}
+
+.comment-form #submit, .wpresidence_button {
+	background: var(--red-color) !important;
+	border-color: var(--red-color) !important;
+}
+
+.comment-form #submit, .wpresidence_button:hover {
+	background: transparent !important;
+	color: var(--red-color) !important;
+}

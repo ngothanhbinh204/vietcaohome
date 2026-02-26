@@ -11,11 +11,11 @@
    Currency Switcher
    ========================================================================== */
 :root {
-    --primary-color: #002e53;
-    --primary-hover: #005f8b;
-    --primary-active: #004d73;
+    --primary-color: #D32F2F;
+    --primary-hover: #D32F2F;
+    --primary-active: #D32F2F;
     --border-color: #ddd;
-    --border-hover: #002e53;
+    --border-hover: #D32F2F;
     --bg-color: #fff;
     --bg-hover: #f0f6fc;
     --text-color: #333;
@@ -249,7 +249,8 @@
 .vhc-dropdown-trigger:hover,
 .vhc-custom-dropdown.active .vhc-dropdown-trigger {
     border-color: var(--primary-color);
-    color: var(--primary-color);
+    background: var(--primary-color);
+	color: white;
 }
 
 .vhc-arrow {
@@ -314,7 +315,7 @@
 
 .vhc-dropdown-item:hover,
 .vhc-dropdown-item.selected {
-    background: #f0f6fc;
+    background: #d32f2f62;
     color: var(--primary-color);
 }
 
